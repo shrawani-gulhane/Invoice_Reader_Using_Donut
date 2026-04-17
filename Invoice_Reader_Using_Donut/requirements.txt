@@ -1,0 +1,16 @@
+torch
+torchvision
+torchaudio
+transformers
+datasets
+sentencepiece
+protobuf
+pillow
+pandas
+numpy
+tqdm
+scikit-learn
+pytorch-lightning
+streamlit
+matplotlib
+opencv-python
