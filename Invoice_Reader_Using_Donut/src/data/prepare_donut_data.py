@@ -1,72 +1,100 @@
 import os
 import json
-from collections import defaultdict
 from tqdm import tqdm
 
-
+# 🔹 UPDATE THIS PATH (VERY IMPORTANT)
 ANNOTATION_DIR = r"C:\Users\shraw\Downloads\FATURA\invoices_dataset_final\Annotations\layoutlm_HF_format"
+
+# 🔹 OUTPUT PATH
 OUTPUT_PATH = r"C:\Users\shraw\OneDrive\Documents\Invoice_Reader_Using_Donut\data\processed\donut_all.json"
 
 
 def extract_fields(words, ner_tags):
-    from collections import defaultdict
+    """
+    Hybrid extraction:
+    - Use tags to group
+    - Use keywords to classify
+    """
 
-    field_map = defaultdict(list)
+    # Step 1: group text by tag
+    tag_groups = {}
 
     for word, tag in zip(words, ner_tags):
-        if tag != 0:  # ignore background
-            field_map[tag].append(word)
+        tag_groups.setdefault(tag, []).append(word)
 
-    # Convert tag IDs to meaningful names (we define manually)
-    tag_to_field = {
-        1: "invoice_total_label",
-        3: "date",
-        5: "buyer_info",
-        6: "seller_name",
-        10: "logo",
-        11: "gst_label",
-        12: "invoice_label",
-        13: "important_value"
+    grouped_text = {
+        tag: " ".join(words_list)
+        for tag, words_list in tag_groups.items()
     }
 
-    structured = {}
+    # Step 2: classify using keywords
+    result = {}
 
-    for tag, words_list in field_map.items():
-        field_name = tag_to_field.get(tag, f"field_{tag}")
-        structured[field_name] = " ".join(words_list)
+    for text in grouped_text.values():
+        t = text.lower()
 
-    return structured
+        # Invoice number
+        if "invoice" in t and "#" in t:
+            result["invoice_no"] = text
+
+        # Date
+        # Due date
+        elif "due date" in t:
+           result["due_date"] = text
+
+        # Invoice date
+        elif "date" in t:
+           result["date"] = text
+
+        # Total
+        elif "total" in t:
+            result["total_amount"] = text
+
+        # Buyer
+        elif "bill to" in t or "buyer" in t:
+            result["buyer"] = text
+
+    return result
 
 
 def convert_fatura_to_donut():
     dataset = []
 
     files = [f for f in os.listdir(ANNOTATION_DIR) if f.endswith(".json")]
-
     print(f"Found {len(files)} annotation files...")
 
-    for file in tqdm(files):
+    for i, file in enumerate(tqdm(files)):
         file_path = os.path.join(ANNOTATION_DIR, file)
 
         with open(file_path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
+        # 🔹 Extract required fields
         image_name = data["path"]
         words = data["words"]
         ner_tags = data["ner_tags"]
 
         ground_truth = extract_fields(words, ner_tags)
 
-        sample = {
+        # 🔹 Skip empty samples
+        if len(ground_truth) == 0:
+            continue
+
+        dataset.append({
             "image": image_name,
             "ground_truth": ground_truth
-        }
+        })
 
-        dataset.append(sample)
+        # 🔹 DEBUG FIRST SAMPLE
+        if i == 0:
+            print("\n--- DEBUG SAMPLE ---")
+            print("WORDS:", words[:20])
+            print("TAGS:", ner_tags[:20])
+            print("CLEANED OUTPUT:", ground_truth)
+            print("--------------------\n")
 
-    print(f"Total samples: {len(dataset)}")
+    print(f"Total usable samples: {len(dataset)}")
 
-    # Save dataset
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
 
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
