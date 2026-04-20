@@ -2,12 +2,9 @@ import os
 import json
 from tqdm import tqdm
 
-# 🔹 UPDATE THIS PATH (VERY IMPORTANT)
-ANNOTATION_DIR = r"C:\Users\shraw\Downloads\FATURA\invoices_dataset_final\Annotations\layoutlm_HF_format"
+ANNOTATION_DIR = r"C:\Users\sagulhan\Downloads\FATURA\layoutlm_HF_format"
 
-# 🔹 OUTPUT PATH
-OUTPUT_PATH = r"C:\Users\shraw\OneDrive\Documents\Invoice_Reader_Using_Donut\data\processed\donut_all.json"
-
+OUTPUT_PATH = r"C:\Users\sagulhan\Downloads\Invoice_Reader_Using_Donut\data\processed\donut_all.json"
 
 def extract_fields(words, ner_tags):
     """

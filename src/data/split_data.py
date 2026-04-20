@@ -5,8 +5,8 @@ import random
 from collections import defaultdict
 from sklearn.model_selection import train_test_split
 
-INPUT_PATH = r"C:\Users\shraw\OneDrive\Documents\Invoice_Reader_Using_Donut\data\processed\donut_all.json"
-OUTPUT_DIR = r"C:\Users\shraw\OneDrive\Documents\Invoice_Reader_Using_Donut\data\processed"
+INPUT_PATH = r"C:\Users\sagulhan\Downloads\Invoice_Reader_Using_Donut\data\processed\donut_all.json"
+OUTPUT_DIR = r"C:\Users\sagulhan\Downloads\Invoice_Reader_Using_Donut\data\processed"
 
 RANDOM_SEED = 42
 
